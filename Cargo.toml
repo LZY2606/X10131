@@ -1,0 +1,12 @@
+[package]
+name = "periodic-adjudicator"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+base64 = "0.22"
+chrono = { version = "0.4.45", default-features = false, features = ["clock", "std", "serde"] }
+chrono-tz = { version = "0.10", features = ["serde"] }
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.151"
+sha2 = "0.11.0"
