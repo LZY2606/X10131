@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>周期规则裁决器</title>
+<link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+<header class="topbar">
+  <h1>周期规则裁决器</h1>
+  <div class="meta">
+    <span id="tzdb"></span>
+    <span class="sep">·</span>
+    <span>全部时间点以 UTC 瞬间裁决，本地墙钟仅用于展示与录入</span>
+  </div>
+</header>
+
+<main class="layout">
+  <section class="card editor">
+    <h2>规则版本</h2>
+    <div class="grid2">
+      <label>规则 ID
+        <input id="rule_id" value="payroll-us" /></label>
+      <label>版本号
+        <input id="version" type="number" value="1" min="0" /></label>
+    </div>
+    <div class="grid2">
+      <label>时区（IANA）
+        <input id="timezone" list="tzlist" value="America/New_York" /></label>
+      <datalist id="tzlist"></datalist>
+      <label>规则指纹（SHA-256，内容决定）
+        <input id="fingerprint" readonly placeholder="保存/查询后显示" /></label>
+    </div>
+    <div class="grid2">
+      <label>起始边界（本地墙钟，闭区间，含端点）
+        <input id="start_local" type="datetime-local" step="1" /></label>
+      <label>结束边界（本地墙钟，闭区间，含端点）
+        <input id="end_local" type="datetime-local" step="1" /></label>
+    </div>
+    <p class="hint">边界先按所选时区解析为 UTC 瞬间；落在跳空/回拨处时按下方 DST 策略处理。</p>
+
+    <div class="grid3">
+      <label>跳空（不存在的本地时间）
+        <select id="gap_policy">
+          <option value="skip">skip：跳过该候选</option>
+          <option value="shift_forward">shift_forward：平移到下一合法瞬间</option>
+        </select></label>
+      <label>回拨（重复的本地时间）
+        <select id="fold_policy">
+          <option value="early">early：只取早侧</option>
+          <option value="late">late：只取晚侧</option>
+          <option value="both" selected>both：两次都保留</option>
+        </select></label>
+      <label>最小间隔（秒，0=关闭）
+        <input id="min_gap_seconds" type="number" min="0" value="0" /></label>
+    </div>
+
+    <h3>包含规则（来源）</h3>
+    <div id="inclusions"></div>
+    <div class="rowbtns">
+      <button data-add="monthly">+ 月内日期</button>
+      <button data-add="weekly">+ 周内日期</button>
+      <button data-add="holiday">+ 节假日</button>
+    </div>
+
+    <h3>节假日集合（日期按时区解释）</h3>
+    <div id="holidays"></div>
+    <div class="rowbtns"><button data-add-holiday="+ 节假日集合">+ 节假日集合</button></div>
+
+    <h3>排除窗（闭区间，端点按 UTC 瞬间比较）</h3>
+    <div id="exclusions"></div>
+    <div class="rowbtns"><button data-add-exclusion="+ 排除窗">+ 排除窗</button></div>
+
+    <div class="rowbtns mainbtns">
+      <button id="btn-preview" class="primary">全量预览裁决序列</button>
+      <button id="btn-save">保存规则到本地</button>
+      <select id="saved_rules" title="已保存的规则"></select>
+      <button id="btn-load-saved">载入选中规则</button>
+      <button id="btn-refresh-saved">刷新</button>
+      <button id="btn-demo">载入演示规则</button>
+    </div>
+  </section>
+
+  <section class="card query">
+    <h2>查询会话</h2>
+    <div class="grid3">
+      <label>方向
+        <select id="direction">
+          <option value="forward">forward（未来）</option>
+          <option value="backward">backward（过去）</option>
+        </select></label>
+      <label>每页条数
+        <input id="limit" type="number" min="1" max="500" value="8" /></label>
+      <label>会话 ID
+        <input id="session_id" placeholder="首页可留空，自动创建" /></label>
+    </div>
+    <div class="rowbtns mainbtns">
+      <button id="btn-query" class="primary">开始/翻页查询</button>
+      <button id="btn-reset">清空游标（从首页开始）</button>
+      <button id="btn-export">导出会话</button>
+      <label class="filebtn">导入会话<input id="import_file" type="file" accept="application/json" hidden /></label>
+    </div>
+    <div id="paging" class="paging"></div>
+    <div id="message" class="message"></div>
+    <div id="timeline" class="timeline"></div>
+  </section>
+</main>
+
+<template id="tpl-inc">
+  <div class="subblock">
+    <div class="subhead"><span class="kind"></span>
+      <input class="inc-id" placeholder="规则 id" />
+      <button class="del">删除</button>
+    </div>
+    <label class="inc-body"></label>
+    <div class="hms">
+      本地时间
+      <input type="number" min="0" max="23" value="9" class="hh" />
+      <input type="number" min="0" max="59" value="0" class="mm" />
+      <input type="number" min="0" max="59" value="0" class="ss" />
+    </div>
+  </div>
+</template>
+
+<script src="/static/app.js"></script>
+</body>
+</html>

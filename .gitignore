@@ -34,3 +34,6 @@ coverage/
 .vite/
 .turbo/
 *.tsbuildinfo
+
+# 本服务的本地数据目录
+.periodic-arbiter-data/
